@@ -1216,11 +1216,7 @@ class Checker:
                     self._expect(ft.result, TY.BOOL, s.judge.span,
                                  "the judge's result")
 
-        if s.temperature is not None and not (0 <= s.temperature <= 2):
-            self.bag.error(
-                "CANON-E0301",
-                f"temperature must be between 0 and 2, found {s.temperature}",
-                e.span, facts={"temperature": str(s.temperature)})
+        self._check_model(e, s)
 
         unknown = [r for r in s.retry_on if r not in RETRY_REASONS]
         for r in unknown:
@@ -1244,6 +1240,76 @@ class Checker:
         if s.grounded_in:
             self._perform("model.judge", e.span)
         return rt
+
+    def _check_model(self, e: A.Ask, s: A.AskSpec):
+        """
+        Validate the target model and the settings against its capabilities.
+
+        Model capabilities are checked here rather than at runtime because the
+        failure is static: a model that rejects `temperature` will reject it on
+        every call, and finding that out from a 400 in production is strictly
+        worse than finding it out from the checker.
+        """
+        from .model import lookup_model, known_models
+
+        info = lookup_model(e.model)
+        if info is None:
+            self.bag.error(
+                "CANON-E0201", f"unknown model {e.model!r}", e.span,
+                facts={"model": e.model, "known": known_models()},
+                repairs=self._near_repairs(e.model, known_models(), e.span))
+            return
+
+        if s.temperature is not None:
+            if not (0 <= s.temperature <= 2):
+                self.bag.error(
+                    "CANON-E0301",
+                    f"temperature must be between 0 and 2, "
+                    f"found {s.temperature}",
+                    e.span, facts={"temperature": str(s.temperature)})
+            elif not info.accepts_temperature:
+                supported = sorted(
+                    a for a in known_models()
+                    if lookup_model(a).accepts_temperature)
+                self.bag.error(
+                    "CANON-E0301",
+                    f"{e.model} does not accept a temperature setting",
+                    e.span,
+                    facts={"model": e.model, "model_id": info.id,
+                           "models_accepting_temperature": supported},
+                    repairs=[Repair(
+                        "manual",
+                        "remove the temperature line; steer the model with "
+                        "the system instruction and contracts instead")],
+                    notes=["This model rejects the parameter outright rather "
+                           "than ignoring it, so the clause would fail every "
+                           "call at runtime."])
+
+        if s.max_tokens is not None and s.max_tokens > info.max_output:
+            self.bag.error(
+                "CANON-E0301",
+                f"max_tokens {s.max_tokens} exceeds the {info.id} limit of "
+                f"{info.max_output}",
+                e.span,
+                facts={"requested": s.max_tokens, "limit": info.max_output,
+                       "model": info.id},
+                repairs=[Repair("replace-span", "use the model's limit",
+                                str(info.max_output), e.span, 0.8)])
+
+        if self.cur is not None and self.cur.decl is not None:
+            cost = self.cur.decl.cost
+            if s.max_tokens and cost and cost.tokens is not None \
+                    and s.max_tokens > cost.tokens:
+                self.bag.warn(
+                    "CANON-W0006",
+                    f"this ask may use {s.max_tokens} tokens but the function "
+                    f"declares a budget of {cost.tokens}",
+                    e.span,
+                    facts={"ask_max_tokens": s.max_tokens,
+                           "declared_budget": cost.tokens},
+                    repairs=[Repair("manual",
+                                    "raise the function's token budget or "
+                                    "lower max_tokens")])
 
     # ================================================== patterns
 

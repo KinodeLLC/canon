@@ -292,7 +292,9 @@ def to_json(v) -> Any:
         return {"$unit": True}
     if isinstance(v, Instant):
         return {"$time": v.epoch_millis, "logical": v.logical}
-    if isinstance(v, tuple):
+    # Lists appear where the runtime collects argument vectors; they round-trip
+    # as Canon lists, same as tuples.
+    if isinstance(v, (tuple, list)):
         return [to_json(x) for x in v]
     if isinstance(v, frozenset):
         return {"$set": [to_json(x) for x in sorted(v, key=_sort_key)]}

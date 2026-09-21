@@ -90,7 +90,6 @@ fn triage(body: Text) -> Text
     system "Classify the urgency of this ticket as low, medium or high."
     input body
     grounded_in body
-    temperature 0
     retries 3 on contract_violation, grounding_failure
     max_tokens 32
   }
@@ -185,6 +184,38 @@ fn compute_total(a: Int) -> Int
   intent "The function the previous one meant to call."
 {
   a
+}
+
+fn bad_temperature(t: Text) -> Text
+  intent "Sets a temperature on a model that rejects the parameter."
+  uses model.infer
+{
+  ask Text from claude.opus {
+    system "Summarise this."
+    input t
+    temperature 0.5
+  }
+}
+
+fn bad_model(t: Text) -> Text
+  intent "Names a model that does not exist."
+  uses model.infer
+{
+  ask Text from claude.opuss {
+    system "Summarise this."
+    input t
+  }
+}
+
+fn over_limit(t: Text) -> Text
+  intent "Asks for more output tokens than the model can produce."
+  uses model.infer
+{
+  ask Text from claude.haiku {
+    system "Summarise this."
+    input t
+    max_tokens 900000
+  }
 }
 '''
 
