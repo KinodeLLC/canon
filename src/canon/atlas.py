@@ -29,7 +29,6 @@ from . import ast as A
 from .canonical import DefInfo, Hasher, Printer, format_module, short
 from .checker import CheckResult, check
 from .diagnostics import Bag
-from .parser import parse
 
 
 # --------------------------------------------------------------------------
@@ -111,15 +110,20 @@ class Atlas:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def from_sources(sources: dict, language: str = "canon") -> "Atlas":
-        """Parse and check a {filename: text} map, then index it."""
-        bag = Bag()
-        modules = []
-        for name, text in sources.items():
-            mod, b = parse(text, name, language)
-            bag.extend(b)
-            modules.append(mod)
-        cr = check(modules, bag)
+    def from_sources(sources: dict) -> "Atlas":
+        """
+        Parse and check a {filename: text} map, then index it.
+
+        Each file is parsed with the language its extension names, so a
+        workspace holding several of the family's languages indexes into one
+        graph.
+        """
+        from .sources import Workspace, load_text
+
+        ws = Workspace()
+        for name, text in sorted(sources.items()):
+            load_text(text, name, ws)
+        cr = check(ws.modules, ws.bag)
         return Atlas(cr, sources=sources)
 
     def _index(self):
@@ -493,12 +497,17 @@ class Proposal:
         self.sources = dict(atlas.sources)
         self.sources.update(changes)
 
-        self.bag = Bag()
-        self.modules = []
+        # Each file is re-parsed with its own language, so a proposal that
+        # touches a Verdict decision in a workspace that also holds Loom and
+        # Weft still checks the whole set.
+        from .sources import Workspace, load_text
+
+        ws = Workspace()
         for name, text in sorted(self.sources.items()):
-            mod, b = parse(text, name)
-            self.bag.extend(b)
-            self.modules.append(mod)
+            load_text(text, name, ws)
+        self.bag = ws.bag
+        self.modules = ws.modules
+        self.workspace = ws
 
         self.result: Optional[CheckResult] = None
         self.new_atlas: Optional[Atlas] = None
@@ -562,14 +571,31 @@ class Proposal:
         }
 
     def canonical(self) -> dict:
-        """The proposal's sources in canonical form, ready to write."""
+        """
+        The proposal's sources in canonical form, ready to write.
+
+        Only Canon files are canonicalised. A surface language lowers *to*
+        Canon, so re-emitting a lowered module would replace a Verdict decision
+        or a Loom workflow with the Canon it expands into -- losing the
+        source. Those files are returned unchanged.
+        """
         if not self.ok:
             return {}
         out = {}
         for mod in self.new_atlas.cr.modules:
-            if mod.source_file in self.changes:
-                out[mod.source_file] = format_module(mod)
+            name = mod.source_file
+            if name not in self.changes:
+                continue
+            if self.workspace.languages.get(name, "canon") == "canon":
+                out[name] = format_module(mod)
+            else:
+                out[name] = self.changes[name]
         return out
+
+    def canonicalised_files(self) -> list:
+        """Which changed files the canonical printer actually rewrote."""
+        return sorted(n for n in self.changes
+                      if self.workspace.languages.get(n, "canon") == "canon")
 
     def commit(self) -> Atlas:
         if not self.ok:

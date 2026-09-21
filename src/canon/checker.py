@@ -566,7 +566,11 @@ class Checker:
                     f"field {f.name!r} is declared twice in {d.name}",
                     f.span, facts={"record": d.name, "field": f.name})
             seen.add(f.name)
-            self.resolve_type(f.ty, f.span)
+            ft = self.resolve_type(f.ty, f.span)
+            if f.default is not None:
+                dt = self.infer(f.default, Scope())
+                self._expect(dt, ft, f.default.span,
+                             f"the default for {d.name}.{f.name}")
         for fname in d.classification:
             if fname not in seen:
                 self.bag.error(
@@ -802,7 +806,10 @@ class Checker:
                          f"field {e.type_name}.{name}")
 
         if e.base is None:
-            missing = sorted(set(declared) - given)
+            # Fields with a declared default may be omitted.
+            defaulted = {f.name for f in ti.decl.fields
+                         if f.default is not None}
+            missing = sorted(set(declared) - given - defaulted)
             if missing:
                 fill = ", ".join(f"{n}: <{TY.show(declared[n])}>"
                                  for n in missing)
@@ -813,6 +820,7 @@ class Checker:
                     + ", ".join(missing),
                     e.span,
                     facts={"record": e.type_name, "missing": missing,
+                           "defaulted": sorted(defaulted),
                            "types": {n: TY.show(declared[n]) for n in missing}},
                     repairs=[Repair("insert-before",
                                     "supply the missing fields", fill,

@@ -417,7 +417,11 @@ class Parser:
             fname = self.expect_name("a field name")
             self.expect_punct(":", "before the field type")
             fty = self.parse_type()
-            p = A.Param(name=fname, ty=fty, doc=fdoc)
+            # A field with a default may be omitted from a literal, which is
+            # what makes adding a field to an existing record a non-breaking
+            # change rather than an edit to every construction site.
+            fdefault = self.parse_expr() if self.eat_op("=") else None
+            p = A.Param(name=fname, ty=fty, doc=fdoc, default=fdefault)
             p.span = self.span_from(fstart)
             r.fields.append(p)
             self.eat_punct(",")

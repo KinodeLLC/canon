@@ -229,6 +229,42 @@ def _resolve(texpr, env, tparams):
     return c.resolve_type(texpr, None)
 
 
+def _default_value(field_decl, env, ti):
+    """Evaluate a record field's declared default."""
+    from . import ast as A
+
+    d = field_decl.default
+    if isinstance(d, A.Lit):
+        return V.UNIT if d.lit_kind == "unit" else d.value
+    if isinstance(d, A.ListLit) and not d.items:
+        return ()
+    if isinstance(d, A.CtorCall) and not d.args:
+        ci = env.ctors.get(d.name)
+        return V.Variant(d.name, (), ci.type_name if ci else "")
+    # Anything more involved needs the evaluator, which is not available here
+    # without a check result; fall back to a zero of the field's type.
+    t = _resolve(field_decl.ty, env, ti.tparams)
+    return _zero(t)
+
+
+def _zero(t):
+    t = TY.prune(t)
+    if isinstance(t, TY.TCon):
+        if t.name == "Int":
+            return 0
+        if t.name == "Dec":
+            return Decimal(0)
+        if t.name == "Text":
+            return ""
+        if t.name == "Bool":
+            return False
+        if t.name == "List":
+            return ()
+        if t.name == "Option":
+            return V.NONE
+    return V.UNIT
+
+
 # --------------------------------------------------------------------------
 # JSON to Canon value
 # --------------------------------------------------------------------------
@@ -365,6 +401,11 @@ def coerce(data, t, env, path: str = "") -> Any:
             fields = []
             for f in ti.decl.fields:
                 if f.name not in data:
+                    # A field with a declared default may be absent from the
+                    # response; anything else is a malformed answer.
+                    if f.default is not None:
+                        fields.append((f.name, _default_value(f, env, ti)))
+                        continue
                     raise CoercionError(f"{path}.{f.name}", "a value",
                                         sorted(data))
                 fields.append((f.name,

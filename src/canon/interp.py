@@ -592,6 +592,13 @@ class Interpreter:
         merged = dict(base_fields)
         merged.update(given)
 
+        # Fill anything still absent from the field's declared default. The
+        # checker has already established that every remaining field has one.
+        if ti is not None:
+            for f in ti.decl.fields:
+                if f.name not in merged and f.default is not None:
+                    merged[f.name] = self.eval(f.default, self.globals)
+
         fields = tuple((n, merged[n]) for n in order if n in merged)
         rec = V.Record(e.type_name, fields)
         self._check_invariants(rec, ti, e.span)

@@ -189,8 +189,14 @@ class Encoder:
         parts = ["rec", _atom(d.name)]
         if d.type_params:
             parts.append("(tp " + " ".join(_atom(t) for t in d.type_params) + ")")
+        # A field's default is part of the record's meaning -- it decides what
+        # a literal that omits the field produces -- so it is hashed.
         fields = " ".join(
-            f"({_atom(f.name)} {self.ty(f.ty)})" for f in d.fields
+            "(" + _atom(f.name) + " " + self.ty(f.ty)
+            + (" (d " + self.expr(f.default) + ")" if f.default is not None
+               else "")
+            + ")"
+            for f in d.fields
         )
         parts.append("(f " + fields + ")")
         if d.invariants:
@@ -861,7 +867,8 @@ class Printer:
             if f.doc:
                 for l in f.doc.split("\n"):
                     self.line(f"--- {l}".rstrip())
-            self.line(f"{f.name}: {self.ty(f.ty)}")
+            default = f" = {self.expr(f.default)}" if f.default is not None else ""
+            self.line(f"{f.name}: {self.ty(f.ty)}{default}")
         for fname, cls in sorted(d.classification.items()):
             self.line(f"classify {fname} {cls}")
         for inv in d.invariants:
