@@ -169,21 +169,25 @@ def structural_diff(old: CheckResult, new: CheckResult,
     # union hides the case that matters: a function newly reaching a capability
     # that something *else* in the codebase already had. That is still a
     # privilege increase for this change, and the gate has to see it.
+    # The delta is computed per definition and then unioned, not as one set
+    # difference across all of them. Unioning first lets a definition that
+    # already held a capability mask another definition newly gaining it, which
+    # is exactly the privilege increase the gate exists to catch.
     touched = {c.qualname for c in diff.changes if c.kind != "unchanged"}
-    old_caps, new_caps = set(), set()
-    old_cls, new_cls = set(), set()
+    caps_added, caps_removed, cls_added = set(), set(), set()
     for qn in touched:
         ofi, nfi = old.env.fns.get(qn), new.env.fns.get(qn)
-        if ofi is not None:
-            old_caps |= set(ofi.transitive)
-            old_cls |= set(ofi.touches)
-        if nfi is not None:
-            new_caps |= set(nfi.transitive)
-            new_cls |= set(nfi.touches)
+        before = set(ofi.transitive) if ofi is not None else set()
+        after = set(nfi.transitive) if nfi is not None else set()
+        caps_added |= after - before
+        caps_removed |= before - after
+        cls_before = set(ofi.touches) if ofi is not None else set()
+        cls_after = set(nfi.touches) if nfi is not None else set()
+        cls_added |= cls_after - cls_before
 
-    diff.capabilities_added = sorted(new_caps - old_caps)
-    diff.capabilities_removed = sorted(old_caps - new_caps)
-    diff.classifications_added = sorted(new_cls - old_cls)
+    diff.capabilities_added = sorted(caps_added)
+    diff.capabilities_removed = sorted(caps_removed)
+    diff.classifications_added = sorted(cls_added)
 
     return diff
 
