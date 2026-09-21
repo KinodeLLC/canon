@@ -1764,6 +1764,8 @@ LAWS = {
     "never_negative": (0, "The result is never negative."),
     "order_independent": (0, "The result does not depend on input order."),
     "injective": (0, "Distinct inputs give distinct outputs."),
+    "invertible_by": (1, "Applying the named function to the result recovers "
+                         "the original input."),
     "grounded": (0, "Every claim in the output is supported by the inputs."),
     "explains": (0, "The result carries a reason for every factor used."),
 }

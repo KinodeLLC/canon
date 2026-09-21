@@ -794,6 +794,23 @@ class Verifier:
                         f"{V.show(result)} -> {V.show(other['result'])}")
             return None
 
+        if name == "invertible_by":
+            other_name = _law_arg_name(law)
+            inverse = self.env.lookup_fn(other_name, fi.module)
+            if inverse is None:
+                return f"no function named {other_name!r} to invert with"
+            if len(args) != 1:
+                return "invertible_by applies to single-argument functions"
+            back = self._rerun(inverse, [result])
+            if back["faulted"]:
+                return (f"{other_name}({V.show(result)}) faulted, so the "
+                        f"round trip cannot be checked")
+            if V.compare(back["result"], args[0]) != 0:
+                return (f"{other_name}({fi.name}(x)) gave "
+                        f"{V.show(back['result'])}, not the original "
+                        f"{V.show(args[0])}")
+            return None
+
         if name == "injective":
             # Checked statistically across the run, not per-call.
             return None
