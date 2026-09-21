@@ -93,7 +93,7 @@ KEYWORDS = {
     "true", "false", "not", "and", "or", "assert", "abort",
     # contracts
     "requires", "ensures", "law", "uses", "cost", "intent", "doc",
-    "decreases", "recursive", "pure", "result", "old",
+    "decreases", "recursive", "result", "old",
     # the native model-invocation form
     "ask",
 }

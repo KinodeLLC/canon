@@ -316,10 +316,10 @@ class Parser:
                 self.next()
                 fn.decreases = self.parse_expr()
                 fn.recursive = True
-            elif self.cur.is_kw("pure"):
-                self.next()
-                fn.uses = []
             else:
+                # Purity is stated as `law pure` rather than as a clause: it is
+                # a property the verifier checks against the body, not a
+                # declaration that silently discards the `uses` list.
                 return
 
     def parse_text_literal(self, what: str) -> str:
