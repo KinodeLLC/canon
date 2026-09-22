@@ -1,28 +1,27 @@
 """
-The agent-computer interface.
+the agent interface.
 
-A JSON-RPC surface over Atlas, the verifier and the gate, spoken over stdin and
-stdout. It exists because the file-and-shell interface an agent normally works
-through is a poor fit for the thing it actually needs to do:
+json-rpc over stdin and stdout, sitting on top of atlas and the verifier and
+the gate. the files and shell an agent normally works through do not fit what
+it actually has to do.
 
-  * Reading code by file wastes most of a context budget on locating things.
-    `atlas.view` returns a projection sized to a stated token budget and says
-    what it left out.
+reading code file by file spends most of a context budget on finding things, so
+`atlas.view` hands back a projection sized to a budget you name and tells you
+what it left out.
 
-  * Editing by writing files leaves broken intermediate states behind when a
-    change does not work out. `edit.propose` type-checks and diffs a change
-    without applying it; `edit.commit` applies it atomically or not at all.
+writing files leaves broken half states behind when a change does not work out,
+so `edit.propose` typechecks and diffs without applying anything and
+`edit.commit` applies the whole thing or none of it.
 
-  * "What will this break" is normally answered by reading. `atlas.blast` and
-    `atlas.capabilities` answer it from the graph.
+what will this break normally gets answered by reading, and `atlas.blast` and
+`atlas.capabilities` answer it off the graph instead.
 
-Every response is a JSON object with `ok`. Errors are the same structured
-diagnostics the compiler produces, not strings, so an agent handles a failed
-edit the same way it handles a failed check.
+every response is a json object with `ok` on it. errors are the same structured
+diagnostics the compiler produces rather than strings, so a failed edit gets
+handled the same way a failed check does.
 
-The interface is read-only until `edit.commit`, and `edit.commit` refuses
-anything that does not type-check. There is no method that writes unchecked
-code.
+nothing writes until `edit.commit` and that refuses anything that does not
+typecheck. there is no method in here that writes code nobody checked.
 """
 
 from __future__ import annotations

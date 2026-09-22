@@ -1,23 +1,20 @@
 """
-The verifier: property generation, counterexample shrinking, and law checking.
+property generation, counterexample shrinking, law checking.
 
-The premise of the whole stack is that correctness has to be establishable
-without a human reading the implementation. That means the checks have to come
-from something other than the implementation -- here, from the contracts and
-laws the author declared, and from the types themselves.
+the whole point of this stack is that correctness has to be establishable
+without somebody reading the implementation, which means the checks have to
+come from somewhere other than the implementation. here they come off the
+contracts and laws whoever wrote it declared, and off the types.
 
-For each function the verifier:
+for each function it generates inputs from the parameter types, throws out the
+ones that break the preconditions, runs the rest under a budget with effects
+going to a recording runtime, checks every postcondition and every declared
+law, shrinks anything that fails down to something small before reporting it,
+and reports what the run actually cost against what was declared.
 
-  * generates inputs from the parameter types
-  * discards inputs that violate the preconditions
-  * runs the function under a budget, with effects going to a recording runtime
-  * checks every postcondition and every declared law
-  * shrinks any failing input to a minimal one before reporting it
-  * reports observed cost against the declared cost
-
-Generation is seeded and deterministic. A failure found in one run reproduces
-in the next, and the seed is part of the report, so a verification result is
-something that can be cited rather than re-discovered.
+generation is seeded so a failure found in one run comes back in the next, and
+the seed goes in the report, so a verification result is something you can
+point at later instead of having to find again.
 """
 
 from __future__ import annotations

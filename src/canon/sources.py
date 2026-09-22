@@ -1,14 +1,14 @@
 """
-Loading a mixed-language workspace.
+loading a workspace with more than one language in it.
 
-Every surface language lowers to Canon, so once a file is loaded its origin
-stops mattering to everything downstream. This module is the one place that
-knows which parser to reach for, dispatching on extension and importing each
-language lazily -- so a workspace that uses only Canon and Verdict does not
-need Loom, Weft, Tract or Rune installed.
+every surface language lowers to canon so once a file is loaded nothing
+downstream cares where it came from. this is the one place that knows which
+parser to reach for, going by file extension and importing each language only
+when it needs it, so a workspace using canon and verdict does not need loom or
+weft or tract or rune installed.
 
-A language that is referenced but not installed produces a diagnostic naming
-the package to install, rather than a traceback.
+a file written in a language that is not installed gets a diagnostic naming the
+package to install rather than a traceback.
 """
 
 from __future__ import annotations

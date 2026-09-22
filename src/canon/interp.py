@@ -1,29 +1,28 @@
 """
-The Canon evaluator.
+the canon evaluator.
 
-Properties that matter more than speed here:
+three things matter here more than speed.
 
-  Deterministic. Nothing in the evaluator reads the clock, the host random
-  source, the filesystem or the network. Everything nondeterministic is an
-  effect, and effects go through a Runtime the caller supplies. Give it a
-  replaying Runtime and the same program takes the same path it took in
-  production, instruction for instruction.
+it is deterministic. nothing in here reads the clock or the host random source
+or the filesystem or the network. anything nondeterministic is an effect and
+effects go through a runtime the caller hands in, so give it a replaying
+runtime and the program takes the same path it took in production.
 
-  Bounded. Every evaluation runs under a Budget covering steps, io operations,
-  model tokens and wall time. A program that exceeds its declared cost stops
-  with a structured fault rather than consuming the machine. This is what makes
-  it safe to execute agent-authored code that has not yet been reviewed.
+it is bounded. every evaluation runs under a budget for steps, io, model tokens
+and wall time, and a program that goes past its declared cost stops with a
+structured fault instead of eating the machine. that is what makes it safe to
+run agent written code nobody has reviewed.
 
-  Contract-enforcing. Preconditions are checked on entry, postconditions on
-  exit, record invariants on construction, and `old(...)` is captured before
-  the body runs. A contract failure is a structured fault carrying the
-  arguments that produced it, which is exactly the shape the verifier needs to
-  turn a failure into a shrinkable counterexample.
+it enforces contracts. requires on entry, ensures on exit, record invariants
+when you build one, and `old(...)` gets captured before the body runs. a
+contract failure is a structured fault carrying the arguments that caused it,
+which is the shape the verifier needs to turn it into a counterexample it can
+shrink.
 
-Note on naming: `Interpreter.eval` walks typed Canon AST nodes by dispatching
-on node class. It is unrelated to the host language's `eval` builtin, which is
-never called anywhere in this package. No host code is ever constructed from,
-or derived from, Canon source.
+on naming, `Interpreter.eval` walks typed canon ast nodes by dispatching on
+node class. it has nothing to do with the host language builtin of the same
+name, which never gets called anywhere in this package, and no host code ever
+gets built out of canon source.
 """
 
 from __future__ import annotations

@@ -1,23 +1,22 @@
 """
-Canon parser.
+the parser.
 
-Recursive descent with precedence climbing. The grammar is deliberately
-unambiguous with at most one token of lookahead, which keeps generated code
-predictable and makes partial-parse recovery practical.
+recursive descent with precedence climbing. the grammar is unambiguous with one
+token of lookahead, which keeps generated code predictable and makes recovering
+from a partial parse worth doing.
 
-Two grammar choices are worth noting because they differ from most languages:
+two things in here are different from most languages.
 
-  1. Statements inside a block are always introduced by a keyword
-     (`let`, `do`, `assert`, `abort`). The block's final item is the only bare
-     expression. This removes any need for statement terminators or
-     newline-sensitivity, so whitespace is purely cosmetic and the canonical
-     printer has complete freedom over layout.
+statements inside a block always start with a keyword, `let` or `do` or
+`assert` or `abort`, and the last item in a block is the only bare expression.
+that means there is nothing to terminate a statement with and no reason to care
+about newlines, so whitespace is cosmetic and the canonical printer can lay
+things out however it wants.
 
-  2. `if` uses `then`/`else` rather than braces, so a brace after an expression
-     always means a record literal or a match body and never a block. That
-     removes the usual ambiguity between `match x { ... }` and a record
-     literal, without needing a parser mode flag anywhere except match
-     scrutinees.
+`if` uses `then` and `else` instead of braces, so a brace after an expression
+is always a record literal or a match body and never a block. that gets rid of
+the usual ambiguity between `match x { ... }` and a record literal without
+needing a parser mode flag anywhere except on match scrutinees.
 """
 
 from __future__ import annotations

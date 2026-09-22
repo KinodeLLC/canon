@@ -1,33 +1,29 @@
 """
-The Ledger: effect journal, capability broker, and audit chain.
+effect journal, capability broker, audit chain.
 
-Three things live here, and they are separate on purpose.
+three things in here and they are kept apart.
 
-  Journal    every effect performed, in order, with its arguments and result.
-             Hash-chained, so a missing or altered entry is detectable. This is
-             what makes replay exact and what shadow deployment diffs against.
+the journal holds every effect performed, in order, with arguments and result,
+hash chained so a missing or altered entry shows up. that is what makes replay
+exact and what shadow deployment diffs against.
 
-  Broker     decides whether an effect may be performed at all. A capability
-             grant names operations, an actor, an expiry, a call ceiling and
-             optional argument constraints. Nothing is permitted by default.
+the broker decides whether an effect happens at all. a grant names operations,
+an actor, an expiry, a call ceiling and optional constraints on the arguments,
+and nothing is allowed unless something granted it.
 
-  Audit      an append-only, hash-chained record of governance events: grants
-             issued and denied, definitions added, verifications run,
-             promotions approved. Distinct from the journal because it answers
-             a different question -- not "what did the program do" but "who
-             authorised it, and on what basis".
+the audit chain is append only and holds governance events, grants issued and
+denied, definitions added, verifications run, promotions approved. it is
+separate from the journal because it answers a different question, not what the
+program did but who allowed it and on what basis.
 
-Three execution modes:
+three modes. live performs effects against real handlers and records them.
+replay performs nothing and hands back recorded results, checking each call
+matches what was recorded. shadow runs new code against a recorded journal,
+answering effects out of the recording and collecting anything that diverged
+instead of raising.
 
-  live     perform effects against real handlers and record them
-  replay   perform nothing; return recorded results, asserting each call
-           matches what was recorded
-  shadow   run new code against a recorded journal: effect results come from
-           the recording, and any divergence is collected rather than raised
-
-Shadow mode is the mechanism that lets a change be evaluated against real
-production traffic before it is promoted, without that change being able to
-touch anything.
+shadow is how a change gets evaluated against real production traffic before it
+ships, without being able to touch anything while it happens.
 """
 
 from __future__ import annotations

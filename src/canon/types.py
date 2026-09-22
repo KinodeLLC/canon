@@ -1,22 +1,20 @@
 """
-The Canon type system.
+the canon type system.
 
-Design constraints, in priority order:
+predictable beats clever. every function and lambda parameter and record field
+is annotated, so the checker only ever instantiates polymorphism and never has
+to generalise it. no let polymorphism, no bidirectional inference, no
+subtyping. what you get for that is a type error landing on one concrete spot
+with a concrete expected and actual, which is what makes it fixable by a
+machine.
 
-  Predictable over clever. Every function, lambda parameter and record field is
-  annotated, so the checker only ever has to *instantiate* polymorphism, never
-  generalise it. There is no let-polymorphism, no bidirectional inference and
-  no subtyping. The consequence is that a type error always points at a single
-  concrete site with a concrete expected and actual type, which is what makes a
-  diagnostic mechanically repairable.
+no implicit conversion. Int does not turn into Dec, Option does not turn into
+what is inside it, nothing is truthy. silent coercion is the main way a
+generated program that looks fine does the wrong thing once it is running.
 
-  No implicit conversion. Int does not become Dec, Option does not become its
-  payload, nothing is truthy. Silent coercion is the main way a plausible
-  looking generated program does the wrong thing at runtime.
-
-  Effects are part of the type. A function type carries the set of effect
-  operations it may perform, so the capability footprint of any call graph is
-  computable statically.
+effects are part of the type. a function type carries the set of effect
+operations it can perform, so the capability footprint of a call graph is
+something you compute rather than something you trust.
 """
 
 from __future__ import annotations

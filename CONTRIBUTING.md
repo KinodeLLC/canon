@@ -1,31 +1,30 @@
 # Contributing
 
-## Versioning
+## versioning
 
-SemVer 2.0.0. Pre-1.0, breaking changes bump the minor.
+semver 2.0.0. before 1.0 a breaking change bumps the minor.
 
-Three versions are tracked separately and all appear in release notes:
+three versions get tracked separately and all three go in release notes
 
-| Version | Bumps when |
+| version | bumps when |
 | --- | --- |
-| Package | Any release. |
-| `language_version` | Surface syntax or semantics change. |
-| `ir_version` | The core IR or canonical encoding changes. |
+| package | any release |
+| `language_version` | surface syntax or semantics change |
+| `ir_version` | the core ir or canonical encoding changes |
 
-An `ir_version` bump invalidates existing content hashes, so it counts as
-breaking regardless of size.
+an `ir_version` bump invalidates every hash that exists, so it counts as
+breaking no matter how small it looks.
 
-## Commits
+## commits
 
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
-`<type>(<scope>): <subject>`.
+conventional commits, `<type>(<scope>): <subject>`.
 
-Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`.
-A `!` after the type or a `BREAKING CHANGE:` body paragraph marks a breaking
-change.
+types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`,
+`chore`. a `!` after the type or a `BREAKING CHANGE:` paragraph marks a
+breaking change.
 
-## Releasing
+## releasing
 
-1. Move `[Unreleased]` entries into a new version section in `CHANGELOG.md`.
-2. Bump the version in `pyproject.toml` and `__init__.py`.
-3. Commit `chore(release): vX.Y.Z`, tag `vX.Y.Z`, push the tag.
+move the `[Unreleased]` entries into a new version section, bump the version in
+`pyproject.toml` and `__init__.py`, commit `chore(release): vX.Y.Z`, tag it and
+push the tag.

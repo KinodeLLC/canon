@@ -1,12 +1,14 @@
 """
-Canon abstract syntax.
+the abstract syntax, which is the core ir.
 
-This is the core IR. The other six surface languages (Intent, Loom, Verdict,
-Weft, Tract, Rune) lower into these node types, which is what lets one type
-checker, one verifier, one runtime and one audit trail serve all of them.
+the other six languages, intent and loom and verdict and weft and tract and
+rune, all lower into these node types. that is what lets one type checker and
+one verifier and one runtime and one audit trail cover all of them instead of
+six of each.
 
-Every node carries a span for diagnostics. Nodes are mutable during lowering
-and then frozen by the canonicalizer, which produces the hashed form.
+every node carries a span so diagnostics can point at something. nodes are
+mutable while lowering runs and then get frozen by the canonicaliser, which is
+what produces the hashed form.
 """
 
 from __future__ import annotations

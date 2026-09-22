@@ -1,23 +1,21 @@
 # Canon
 
-The core language of the [Kinode](../kinode-stack) stack: contracts,
-capability-typed effects, content-addressed definitions, and the shared IR that
-Intent, Loom, Verdict, Weft, Tract and Rune all lower to.
+core language for the [kinode](../kinode-stack) stack. contracts, effects that
+work like capabilities, definitions addressed by content hash.
 
-This package also contains the runtime, the verifier, the Ledger, Atlas, the
-command line and the agent interface.
+intent, loom, verdict, weft, tract and rune all lower to this. the runtime,
+verifier, journal, atlas, cli and agent interface are in here too.
 
-## Install
+## install
 
 ```sh
 pip install -e .
 ```
 
-No dependencies. Python 3.11+. Live model calls need the optional Anthropic
-SDK (`pip install anthropic`); everything else — checking, verification,
-shadow runs — works without it.
+python 3.11+, no deps. live model calls want the anthropic sdk
+(`pip install anthropic`), everything else runs without it.
 
-## A definition
+## example
 
 ```canon
 module billing
@@ -37,7 +35,6 @@ fn refund(c: Charge, amt: Int) -> Result<Refund, RefundError>
   intent "Refund up to the captured amount of a charge, once."
   uses ledger.append
   requires amt > 0
-  ensures true
   law idempotent_by(c.id)
   cost steps 5000, io 2
 {
@@ -55,24 +52,34 @@ fn refund(c: Charge, amt: Int) -> Result<Refund, RefundError>
 }
 ```
 
-## What is enforced
+## constraints
 
-- **Effects are declared, never inferred.** A function that performs an effect
-  must say so, and so must every caller. An inferred footprint widens silently
-  when a body changes.
-- **Everything is total.** No division operator (use `Int.div`, which returns
-  `Option`); recursion requires a `decreases` measure; matches must be
-  exhaustive; every evaluation runs under a step, io, token and spend budget.
-- **No implicit conversion, no truthiness, no subtyping.** A type error points
-  at one site with a concrete expected and actual type.
-- **Contracts are enforced at runtime** — preconditions on entry,
-  postconditions on exit, record invariants on construction — and carry the
-  arguments that produced the failure.
-- **Definitions are content-addressed.** Renaming a local, reordering
-  independent clauses or reformatting does not change a hash. Editing a
-  dependency changes the dependent's deep hash but not its local hash.
+every effect has to be declared. if a function writes to storage it says so in
+the uses clause, and so does anything that calls it, so when you add an effect
+down in a call graph you have to go update every caller above it. the error
+lists them for you. canon will not infer it because then the list grows every
+time somebody edits a body and you do not find out until it is in production
 
-## The model primitive
+there is no division operator. dividing by zero is the only arithmetic that can
+fail so you use Int.div instead and it hands you back an Option. recursion
+needs a decreases measure and the runtime checks it, matches have to cover
+every case, and everything runs under a budget for steps, io, tokens and money
+
+no implicit conversion, no truthiness, no subtyping. a type error points at one
+spot and tells you what it expected and what it got instead of unwinding
+through three layers of inference
+
+contracts run at runtime. requires on the way in, ensures on the way out,
+record invariants whenever you build one, and when something fails you get back
+the arguments that did it
+
+definitions are addressed by content hash. rename a local variable or reorder
+your clauses or reformat the file and the hash does not move. change something
+a function depends on and its deep hash moves while its local hash stays where
+it was, so you can tell the difference between somebody editing a function and
+somebody editing what it calls
+
+## models
 
 ```canon
 ask Assessment from claude.opus {
@@ -84,29 +91,35 @@ ask Assessment from claude.opus {
 }
 ```
 
-A JSON Schema is derived from the declared type, the enclosing `ensures`
-clauses become obligations on the answer, the call is capability-scoped,
-budgeted and journaled, and model capabilities are checked at compile time.
+`ask` is an expression, not an sdk call. the json schema comes off the type you
+declared, the `ensures` clauses on the function become obligations the answer
+has to satisfy, and if it fails one you get a retry with the failure handed
+back to the model as context. the call needs a grant like any other effect and
+it gets budgeted and written to the journal
 
-## Command line
+model capabilities get checked when you compile. current claude models reject
+`temperature` with a 400 instead of ignoring it, so canon will not let you
+write it for those models rather than letting you find out in production
+
+## cli
 
 ```sh
-canon check   src/            # parse and type-check
+canon check   src/            # parse and typecheck
 canon fmt     src/ --write    # canonical source
 canon hash    src/            # content hashes
 canon test    src/            # declared tests
 canon verify  src/ --runs 60  # contracts and laws over generated inputs
-canon run     src/ --function refund --arguments '{"$rec": "..."}' '5000'
+canon run     src/ --function refund --arguments '...' '5000'
 canon atlas   blast refund src/
-canon diff    old/ new/       # structural and behavioural
-canon journal run.journal     # inspect and verify an effect journal
+canon diff    old/ new/
+canon journal run.journal
 canon serve   src/            # agent interface on stdin/stdout
 ```
 
-The loader dispatches on file extension, so `canon check src/` handles a
-directory containing all seven of the family's languages.
+the loader goes by file extension so `canon check src/` handles a directory
+with all seven languages mixed together in it
 
-## Library
+## library
 
 ```python
 from canon.sources import load, check_workspace
@@ -123,21 +136,21 @@ print(atlas.blast_radius("refund"))
 print(Verifier(cr, seed="prod", runs=100).verify_all().render())
 ```
 
-## Tests
+## tests
 
 ```sh
 for t in tests/smoke_*.py; do python "$t"; done
 ```
 
-Seven suites: front end, checker, interpreter, Ledger, verifier, Atlas, agent
+seven suites. front end, checker, interpreter, journal, verifier, atlas, agent
 protocol.
 
-## Documentation
+## docs
 
-[Architecture](../kinode-stack/docs/architecture.md) ·
-[Languages](../kinode-stack/docs/languages.md) ·
-[Diagnostics](../kinode-stack/docs/diagnostics.md)
+[architecture](../kinode-stack/docs/architecture.md) ·
+[languages](../kinode-stack/docs/languages.md) ·
+[diagnostics](../kinode-stack/docs/diagnostics.md)
 
-## Licence
+## licence
 
-Apache-2.0. Copyright Kinode.
+Apache-2.0, Kinode.

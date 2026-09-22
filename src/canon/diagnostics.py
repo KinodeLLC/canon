@@ -1,21 +1,17 @@
 """
-Canon diagnostics.
+diagnostics.
 
-Diagnostics are structured objects rather than formatted strings, because the
-primary consumer is a program that has to act on them. Each one carries:
+these are structured objects rather than formatted strings, because what
+consumes them is usually a program that has to act on them. each one carries a
+stable code like CANON-E0101, a severity, a source span, a bag of facts like
+the expected and actual type or the missing capability or the counterexample
+input, and zero or more concrete edits that would fix it.
 
-  code        stable machine identifier (CANON-E0101)
-  severity    error | warning | advice
-  span        source location
-  facts       key/value payload (expected type, actual type, missing
-              capability, counterexample input, and so on)
-  repairs     zero or more concrete edits that would resolve it
+the text you read gets generated off the structure. nothing downstream should
+be parsing rendered output.
 
-Rendered text is generated from the structured form. Nothing downstream should
-parse the rendered output.
-
-Diagnostic codes are treated as a public API: new ones can be added, but the
-meaning of an existing code does not change.
+codes are public api. you can add new ones, an existing one does not change
+what it means.
 """
 
 from __future__ import annotations

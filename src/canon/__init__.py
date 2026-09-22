@@ -1,22 +1,20 @@
 """
-Canon: the core language of the Kinode stack.
+canon, the core language of the kinode stack.
 
-Public surface:
+what you get from here
 
     parse(source, filename)         -> (Module, Bag)
     check(modules)                  -> CheckResult
     format_module(module)           -> canonical source text
     Hasher().add_modules(modules)   -> {qualname: DefInfo}
 
-Three version numbers are tracked separately because they change for different
-reasons and have different blast radii:
+three version numbers tracked separately, since they move for different reasons
+and break different things. `__version__` is the package release,
+`LANGUAGE_VERSION` is the surface syntax and semantics, and `IR_VERSION` is the
+core ir and its canonical encoding.
 
-    __version__         the package release
-    LANGUAGE_VERSION    surface syntax and semantics
-    IR_VERSION          the core IR and its canonical encoding
-
-An IR_VERSION change invalidates every stored content hash, so it is always a
-breaking release regardless of how small the change is.
+changing `IR_VERSION` invalidates every content hash anybody has stored, so it
+is always a breaking release no matter how small the change looks.
 """
 
 __version__ = "0.1.0"

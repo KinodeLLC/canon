@@ -1,24 +1,28 @@
 """
-The model runtime behind the `ask` expression.
+the model runtime behind the `ask` expression.
 
-`ask` is a language primitive rather than a library call, which lets the runtime
-do five things an SDK call cannot:
+`ask` is part of the language instead of a library call, which lets this do
+five things an sdk call cannot.
 
-  1. Constrain the response to a schema derived from the declared Canon type,
-     so the result is a typed value rather than a string to be parsed.
-  2. Enforce the enclosing function's contracts on the model's output and
-     re-ask on failure, with the failure fed back as repair context.
-  3. Treat the call as a capability-scoped effect, so it is denied unless
-     granted, counted against io/token/money budgets, and journaled.
-  4. Cache by content hash, so an identical ask with identical inputs is free
-     and, more importantly, reproducible.
-  5. Record the whole exchange -- prompt, response, contract verdict -- as a
-     journal entry, which is what makes replay exact.
+it constrains the response to a schema built off the declared canon type, so
+what comes back is a typed value and not a string somebody has to parse.
 
-Providers are pluggable. `DeterministicProvider` produces schema-valid values
-without a network and is what the test suite and the verifier run against;
-`AnthropicProvider` calls the real API; `ReplayProvider` reads answers back out
-of a journal.
+it enforces the enclosing function's contracts on the model output and asks
+again when one fails, handing the failure back as context for the repair.
+
+it treats the call as a capability scoped effect, so it gets denied unless
+somebody granted it, and it counts against the io and token and money budgets
+and goes in the journal.
+
+it caches by content hash, so the same ask with the same inputs costs nothing
+and, more to the point, comes out the same.
+
+it records the whole exchange, prompt and response and contract verdict, as a
+journal entry, which is what makes replay exact.
+
+providers plug in. deterministic produces schema valid values with no network
+and is what the tests and the verifier run against, anthropic calls the real
+api, and recorded reads answers back out of a journal.
 """
 
 from __future__ import annotations

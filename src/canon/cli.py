@@ -1,13 +1,14 @@
 """
-The `canon` command.
+the `canon` command.
 
-One entry point for the whole family: the loader dispatches on file extension,
-so `canon check src/` type-checks a directory holding Canon, Verdict, Loom,
-Weft, Tract, Rune and Intent side by side and reports against one set of
-diagnostics.
+one entry point for all of it. the loader goes by file extension so
+`canon check src/` typechecks a directory with canon and verdict and loom and
+weft and tract and rune and intent sitting next to each other and reports
+against one set of diagnostics.
 
-Every subcommand takes `--json`, because the primary caller is a program. The
-human rendering is generated from the same structure, not the other way round.
+every subcommand takes `--json`, since what usually calls this is a program.
+the version a person reads gets generated off the same structure, not the other
+way round.
 """
 
 from __future__ import annotations

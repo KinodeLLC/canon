@@ -1,35 +1,29 @@
 """
-Canonical form and content addressing.
+canonical form and content addressing.
 
-Two jobs:
+two jobs in here. encode turns a declaration into a canonical byte string,
+ignoring anything that does not change what the declaration means, so local
+variable names and the order of independent contract clauses and operator
+synonyms and whitespace and comments all come out the same. two declarations
+that mean the same thing encode identically.
 
-1. `encode` turns a declaration into a canonical byte string. The encoding is
-   invariant under things that do not change meaning: local variable names,
-   the order of independent contract clauses, the spelling of operators that
-   have synonyms, whitespace, and comments. Two declarations that mean the
-   same thing encode identically.
+hasher turns that encoding into an identifier, two per definition. the local
+hash covers the body with dependencies referenced by name so it only moves when
+you edit this definition. the deep hash covers the body with dependencies
+referenced by their own deep hashes so it moves when you edit this or anything
+under it.
 
-2. `Hasher` turns that encoding into an identifier. Each definition gets two:
+the deep hash is the identity. verification results, cached evaluations,
+journal entries and audit records all key off it, so a result cannot end up
+attributed to the wrong version of the code.
 
-     local hash   covers the definition's own body, with dependencies
-                  referenced by name. Changes only when this definition is
-                  edited.
-     deep hash    covers the body with dependencies referenced by *their* deep
-                  hashes. Changes when this definition or anything it
-                  transitively depends on is edited.
+local variables get encoded by binding depth instead of by name, so renaming a
+parameter or a let binding gives you the same hash back. that makes a rename a
+zero risk edit, nothing downstream gets invalidated and nothing needs
+rechecking.
 
-   The deep hash is the definition's identity. It is what verification results,
-   cached evaluations, journal entries and audit records are keyed by, so a
-   result can never be attributed to the wrong version of the code.
-
-Local variables are encoded by binding depth rather than name, so renaming a
-parameter or a let-binding produces the same hash. That makes a rename a
-zero-risk edit: nothing downstream is invalidated, no re-verification is
-needed, and no reviewer has to look at it.
-
-`Printer` renders a declaration back to source text. Because the AST it prints
-from is already canonical, formatting is not a matter of preference and there
-is no configuration.
+printer renders a declaration back to source. the ast it prints from is already
+canonical so there is nothing to configure.
 """
 
 from __future__ import annotations

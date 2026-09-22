@@ -1,23 +1,21 @@
 """
-Atlas: the semantic view of a codebase, and the interface an agent edits through.
+the semantic view of a codebase, and what an agent edits through.
 
-An agent working through files and grep spends most of its context budget
-locating things and most of its risk on not knowing what a change will affect.
-Atlas replaces both: the codebase is a graph of hash-identified definitions, and
-the questions that matter are graph queries rather than searches.
+an agent working off files and grep burns most of its context budget finding
+things and most of its risk on not knowing what a change will hit. here the
+codebase is a graph of definitions identified by hash and the questions that
+matter are graph queries rather than searches.
 
-  sig / show       what is this, at a chosen level of detail
-  callers / calls  who depends on this, what does it depend on
-  blast            everything a change here could reach
-  caps             the exact capability footprint of that call graph
-  touches          what data classifications it reaches
-  unverified       what has no contracts, no intent, or no verification
-  view             a projection of the codebase that fits a token budget
+show tells you what something is at whatever level of detail you asked for.
+callers and calls tell you what depends on it and what it depends on. blast
+gives you everything a change here could reach. caps gives you the capability
+footprint of that call graph. unverified lists whatever has no contracts or no
+intent. view hands back a projection that fits a token budget you name.
 
-Edits go through a transaction: propose, check, inspect the blast radius and
-the diff, then commit or abort. A proposal that does not type-check, or that
-reaches outside its authorisation, never becomes the working state -- so a
-failed edit costs nothing and leaves nothing behind.
+edits go through a transaction. you propose, it checks, you look at the blast
+radius and the diff, then you commit or abort. a proposal that does not
+typecheck or reaches outside what it was allowed to touch never becomes the
+working state, so a failed edit costs nothing and leaves nothing behind.
 """
 
 from __future__ import annotations

@@ -1,31 +1,29 @@
 """
-Behavioural diffing, shadow execution, and the promotion gate.
+behavioural diffing, shadow execution, the promotion gate.
 
-This is the part of the stack that answers the question a promotion decision
-actually turns on: *what would change if this shipped?* Not "does it compile"
-and not "do the tests pass", but the specific difference in observable
-behaviour between the version running now and the version proposed.
+this answers the thing a promotion decision actually turns on, which is what
+would change if this shipped. not whether it compiles and not whether the tests
+pass, the specific difference in behaviour between what is running now and what
+somebody is proposing.
 
-Three layers, cheapest first:
+three layers, cheapest first.
 
-  Structural diff   which definitions changed, by content hash, and what the
-                    blast radius of those changes is across the call graph.
-                    Free -- it is a graph walk over hashes.
+structural diff is which definitions changed by content hash and what the blast
+radius of that is across the call graph. it costs nothing, it is a graph walk
+over hashes.
 
-  Differential run  for each changed function, generate inputs and run both
-                    versions side by side under identical conditions. Any
-                    input where they disagree is reported with the two
-                    results. Cheap, and finds most real regressions.
+differential run takes each changed function, generates inputs, and runs both
+versions side by side under the same conditions, reporting any input where they
+disagree along with both results. cheap, and it finds most real regressions.
 
-  Shadow replay     run the new version against a recorded production journal.
-                    Effect results come from the recording, so nothing is
-                    touched, and any divergence in what the new version *would*
-                    have done is collected.
+shadow replay runs the new version against a recorded production journal.
+effect results come out of the recording so nothing gets touched, and anything
+the new version would have done differently gets collected.
 
-The gate then compares all of that against the authorisation the change was
-granted. A change that only alters definitions inside its authorised blast
-radius, introduces no new capabilities, and diverges on nothing can be promoted
-without anyone reading it. Anything else is escalated, with the specific reason.
+then the gate takes all of that and compares it against whatever the change was
+authorised to do. a change that only touches definitions inside its authorised
+blast radius, picks up no new capabilities and diverges on nothing can go out
+with nobody reading it. anything else gets escalated with the reason on it.
 """
 
 from __future__ import annotations

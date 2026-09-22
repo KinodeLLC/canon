@@ -1,12 +1,12 @@
 """
-Runtime value representation.
+runtime values.
 
-Values are immutable. Nothing in Canon mutates a value in place, so a value can
-be hashed, cached, journaled and compared structurally without defensive
-copying. That is what makes deterministic replay and result caching cheap
-rather than a special mode.
+nothing in canon mutates a value in place, so a value can be hashed and cached
+and journaled and compared structurally with no defensive copying anywhere.
+that is what makes deterministic replay and result caching cheap instead of
+something you have to switch on.
 
-Mapping to host types:
+how they map onto host types:
 
     Int      int (arbitrary precision)
     Dec      decimal.Decimal

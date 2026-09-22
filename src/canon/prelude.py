@@ -1,15 +1,15 @@
 """
-The Canon prelude: builtin types, builtin effects, and the standard library.
+builtin types, builtin effects, standard library.
 
-The builtin effects are written in Canon itself and parsed at import time, so
-they are described by exactly the same declarations a user would write. There
-is no privileged syntax for them.
+the builtin effects are written in canon and parsed when this imports, so they
+are described by the same declarations anybody else would write and there is no
+special syntax holding them up.
 
-Standard library functions are declared with their Canon signature alongside a
-host implementation. Every one of them is total: no library call can raise, so
-anything that can fail returns `Option` or `Result`. That is what lets the
-checker treat `?` and `match` as the only two ways control flow leaves a
-function, which in turn is what makes the effect and cost analysis exact.
+stdlib functions get declared with their canon signature next to a host
+implementation. every one of them is total, nothing in here can raise, so
+anything that can fail hands back an `Option` or a `Result`. that is what lets
+the checker treat `?` and `match` as the only two ways control flow leaves a
+function, which is what makes the effect and cost analysis exact.
 """
 
 from __future__ import annotations

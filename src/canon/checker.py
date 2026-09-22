@@ -1,19 +1,14 @@
 """
-The Canon checker.
+the canon checker.
 
-One pass over a set of modules produces, for every definition:
+one pass over a set of modules gives you, for every definition, a resolved
+type, the exact set of effect operations its body performs, the transitive
+capability footprint of its whole call graph, exhaustiveness results for every
+match, type checked contract clauses, and a call graph.
 
-  * a fully resolved type
-  * the exact set of effect operations its body performs
-  * the transitive capability footprint of its whole call graph
-  * exhaustiveness results for every match
-  * type-checked contract clauses
-  * a call graph
-
-The transitive capability footprint is the part that matters operationally. It
-answers "what can this change possibly touch" statically, without running
-anything, which is what a promotion gate needs in order to approve an
-agent-authored change without a human reading the body.
+the transitive footprint is the part that does work later. it tells you what a
+change can touch without running anything, which is what the promotion gate
+needs to approve agent written code that nobody has read.
 """
 
 from __future__ import annotations

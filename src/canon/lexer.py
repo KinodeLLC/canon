@@ -1,20 +1,18 @@
 """
-Canon lexer, shared by every language in the family.
+the lexer, shared by every language in the family.
 
-The tokenizer is parameterized by a keyword set, so Canon, Loom, Verdict, Weft,
-Tract, Rune and Intent all use the same lexical layer: one whitespace policy,
-one comment syntax, one escape table, one numeric tower.
+it takes a keyword set as a parameter, so canon and loom and verdict and weft
+and tract and rune and intent all run through the same lexical layer with one
+whitespace policy, one comment syntax, one escape table and one numeric tower.
 
-Lexical rules, chosen to keep the number of ways to write the same thing as
-close to one as possible:
-
-  - Tabs are an error. Indentation is spaces only.
-  - One comment syntax (`--`) and one doc-comment syntax (`---`).
-  - Numbers are Int (arbitrary precision) or Dec (exact decimal). There is no
-    binary floating point type, since most of the target workloads are
-    monetary or regulatory and cannot tolerate representation error.
-  - A small closed escape table for text literals. No octal or \\x escapes.
-  - No user-defined operators, macros, or syntax extensions.
+the rules are picked to keep the number of ways to write the same thing as
+close to one as it can get. tabs are an error, indentation is spaces. one
+comment syntax `--` and one doc comment syntax `---`. numbers are Int with
+arbitrary precision or Dec which is exact decimal, and there is no binary
+floating point, because most of what this is for is money or regulation and
+neither can take representation error. text literals get a small closed escape
+table, no octal and no \\x. no user defined operators, no macros, no syntax
+extensions.
 """
 
 from __future__ import annotations
