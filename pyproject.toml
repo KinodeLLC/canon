@@ -22,8 +22,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/ExposingTheBadge/canon"
-Changelog = "https://github.com/ExposingTheBadge/canon/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/KinodeLLC/canon"
+Changelog = "https://github.com/KinodeLLC/canon/blob/main/CHANGELOG.md"
 
 [project.scripts]
 canon = "canon.cli:main"

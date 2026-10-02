@@ -1,6 +1,6 @@
 # Canon
 
-core language for the [kinode](../kinode-stack) stack. contracts, effects that
+core language for the [kinode](https://github.com/KinodeLLC/kinode-stack) stack. contracts, effects that
 work like capabilities, definitions addressed by content hash.
 
 intent, loom, verdict, weft, tract and rune all lower to this. the runtime,
@@ -147,9 +147,9 @@ protocol.
 
 ## docs
 
-[architecture](../kinode-stack/docs/architecture.md) ·
-[languages](../kinode-stack/docs/languages.md) ·
-[diagnostics](../kinode-stack/docs/diagnostics.md)
+[architecture](https://github.com/KinodeLLC/kinode-stack/blob/main/docs/architecture.md) ·
+[languages](https://github.com/KinodeLLC/kinode-stack/blob/main/docs/languages.md) ·
+[diagnostics](https://github.com/KinodeLLC/kinode-stack/blob/main/docs/diagnostics.md)
 
 ## licence
 
